@@ -9,6 +9,8 @@ primary_region = "sin"
   GENERIC_TIMEZONE = "Asia/Jakarta"
   N8N_HOST = "otomatis.fly.dev"
   WEBHOOK_URL = "https://otomatis.fly.dev/"
+  TINI_SUBREAPER = "true"
+  N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = "true"
 
 [http_service]
   internal_port = 5678
