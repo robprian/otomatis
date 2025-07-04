@@ -25,3 +25,12 @@ primary_region = "sin"
 [[vm]]
   size = "shared-cpu-1x"
   memory = 256
+
+[checks]
+  [checks.web]
+    type = "http"
+    interval = "10s"
+    timeout = "5s"
+    path = "/"
+    method = "GET"
+    grace_period = "30s"
