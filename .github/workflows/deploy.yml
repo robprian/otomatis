@@ -1,0 +1,58 @@
+name: Deploy n8n "otomatis" to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Create App & Volume if Needed
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          APP_NAME="otomatis"
+          REGION="sin"
+          VOLUME_NAME="n8n_data"
+
+          if ! flyctl apps list | grep -q "^$APP_NAME"; then
+            echo "Creating Fly app: $APP_NAME"
+            flyctl apps create "$APP_NAME"
+            sleep 5
+          else
+            echo "App $APP_NAME already exists."
+          fi
+
+          if ! flyctl volumes list --app "$APP_NAME" | grep -q "$VOLUME_NAME"; then
+            echo "Creating volume $VOLUME_NAME..."
+            flyctl volumes create "$VOLUME_NAME" --region "$REGION" --size 1 --app "$APP_NAME" --yes
+          else
+            echo "Volume $VOLUME_NAME already exists."
+          fi
+
+      - name: Set Fly.io Secrets
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          N8N_BASIC_AUTH_USER: ${{ secrets.N8N_BASIC_AUTH_USER }}
+          N8N_BASIC_AUTH_PASSWORD: ${{ secrets.N8N_BASIC_AUTH_PASSWORD }}
+        run: |
+          flyctl secrets set \
+            N8N_BASIC_AUTH_ACTIVE=true \
+            N8N_BASIC_AUTH_USER="$N8N_BASIC_AUTH_USER" \
+            N8N_BASIC_AUTH_PASSWORD="$N8N_BASIC_AUTH_PASSWORD" \
+            --app otomatis
+
+      - name: Deploy to Fly.io
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy --remote-only --app otomatis
