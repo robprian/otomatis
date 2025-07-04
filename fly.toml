@@ -24,7 +24,7 @@ primary_region = "sin"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = 256
+  memory = 512
 
 [checks]
   [checks.web]
